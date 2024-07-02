@@ -1,0 +1,64 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: surfers-flask-accelerator
+  annotations:
+    ootb.apps.tanzu.vmware.com/servicebinding-workload: "true"
+    ootb.apps.tanzu.vmware.com/apidescriptor-ref: "true"
+    kapp.k14s.io/change-rule: upsert after upserting servicebinding.io/ServiceBindings
+  labels:
+    app.kubernetes.io/part-of: surferslookout
+    apps.tanzu.vmware.com/has-tests: "true"
+    apps.tanzu.vmware.com/language: python
+    apps.tanzu.vmware.com/workload-type: web
+    app.kubernetes.io/component: run
+    carto.run/workload-name: surfers-flask-accelerator
+spec:
+  template:
+    metadata:
+      annotations:
+        apps.tanzu.vmware.com/correlationid: harbor.home.tanzu.rocks/tap/local-source:alpha-surfers-flask-accelerator?sub_path=/
+        apps.tanzu.vmware.com/debug: "true"
+        apps.tanzu.vmware.com/live-update: "true"
+        autoscaling.knative.dev/initial-scale: "1"
+        autoscaling.knative.dev/max-scale: "50"
+        autoscaling.knative.dev/metric: rps
+        autoscaling.knative.dev/min-scale: "1"
+        autoscaling.knative.dev/scale-down-delay: 2s
+        autoscaling.knative.dev/target: "60"
+        autoscaling.knative.dev/window: 10s
+        conventions.carto.run/applied-conventions: |-
+          developer-conventions/add-source-image-label
+          spring-boot-convention/auto-configure-actuators-check
+          spring-boot-convention/is-native-app-check
+          spring-boot-convention/is-prometheus-enabled-check
+          spring-boot-convention/app-live-view-appflavour-check
+        developer.apps.tanzu.vmware.com/image-source-digest: harbor.home.tanzu.rocks/tap/local-source:alpha-surfers-flask-accelerator@sha256:fcffbc5bf9d4260e01136790516214db94202f4343da7fcb5f779d778c9885ef
+        developer.conventions/target-containers: workload
+        local-source-proxy.apps.tanzu.vmware.com: harbor.home.tanzu.rocks/tap/local-source:alpha-surfers-flask-accelerator@sha256:fcffbc5bf9d4260e01136790516214db94202f4343da7fcb5f779d778c9885ef
+      labels:
+        app.kubernetes.io/component: run
+        app.kubernetes.io/part-of: surferslookout
+        apps.tanzu.vmware.com/has-tests: "true"
+        apps.tanzu.vmware.com/language: python
+        apps.tanzu.vmware.com/workload-type: web
+        carto.run/workload-name: surfers-flask-accelerator
+    spec:
+      containers:
+      - env:
+        - name: COLOR
+          value: red
+        image: harbor.home.tanzu.rocks/tap/supply-chain/surfers-flask-accelerator-alpha@sha256:52c30cbcac83863bc198927c24a6151879694c917f5498b12fac6c84d049e6bc
+        name: workload
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          runAsUser: 1000
+          seccompProfile:
+            type: RuntimeDefault
+      serviceAccountName: default
+
